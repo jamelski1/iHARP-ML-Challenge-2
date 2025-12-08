@@ -1,7 +1,7 @@
 
 # iHARP ML Challenge 2 - 'Predicting Coastal Flooding Events.'
 
-# This is a repository of the Year 2 HDR ML Challenge on 'Modelling Out Of Distribution.'
+# This is a repository for the Year 2 HDR ML Challenge themed 'Modelling Out Of Distribution.'
 
 ***Important note for the baseline model:***
 1. The example submission uses 'alternative' thresholds as placeholders for the model.
