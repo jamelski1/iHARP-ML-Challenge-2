@@ -1,0 +1,43 @@
+======================================================================
+COASTAL FLOODING TREND ANALYSIS REPORT
+======================================================================
+
+SUMMARY
+----------------------------------------
+Total stations analyzed: 12
+Total anomalies detected: 2760
+
+STATIONS WITH INCREASING FLOOD TRENDS
+----------------------------------------
+  Wilmington: +0.975 flood days/year
+  Annapolis: +0.745 flood days/year
+  Sewells_Point: +0.730 flood days/year
+  Charleston: +0.701 flood days/year
+  Sandy_Hook: +0.677 flood days/year
+  Atlantic_City: +0.641 flood days/year
+  The_Battery: +0.612 flood days/year
+  Washington: +0.595 flood days/year
+  Lewes: +0.564 flood days/year
+  Fernandina_Beach: +0.504 flood days/year
+  Eastport: +0.294 flood days/year
+  Portland: +0.289 flood days/year
+
+DATA QUALITY CONCERNS
+----------------------------------------
+  ⚠ Annapolis: 38.5% missing data in worst year
+  ⚠ Atlantic_City: 100.0% missing data in worst year
+  ⚠ Charleston: 24.9% missing data in worst year
+  ⚠ Eastport: 84.8% missing data in worst year
+  ⚠ Fernandina_Beach: 51.0% missing data in worst year
+  ⚠ Lewes: 100.0% missing data in worst year
+  ⚠ Portland: 34.3% missing data in worst year
+  ⚠ Sandy_Hook: 42.9% missing data in worst year
+  ⚠ Sewells_Point: 14.6% missing data in worst year
+  ⚠ The_Battery: 46.7% missing data in worst year
+  ⚠ Washington: 83.4% missing data in worst year
+  ⚠ Wilmington: 52.2% missing data in worst year
+
+HIGH ANOMALY STATIONS (> 2x median)
+----------------------------------------
+
+======================================================================
