@@ -328,13 +328,12 @@ class TransformerFloodClassifier(nn.Module):
         )
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
-        # Classification head
+        # Classification head (outputs raw logits for BCEWithLogitsLoss)
         self.classifier = nn.Sequential(
             nn.Linear(d_model, d_model // 2),
             nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(d_model // 2, 1),
-            nn.Sigmoid()
+            nn.Linear(d_model // 2, 1)
         )
 
     def _generate_positional_encoding(self, max_len, d_model):
@@ -514,7 +513,9 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
         optimizer.step()
 
         total_loss += loss.item()
-        all_preds.extend(outputs.detach().cpu().numpy())
+        # Apply sigmoid to convert logits to probabilities
+        probs = torch.sigmoid(outputs)
+        all_preds.extend(probs.detach().cpu().numpy())
         all_labels.extend(batch_y.cpu().numpy())
 
     avg_loss = total_loss / len(dataloader)
@@ -542,7 +543,9 @@ def evaluate(model, dataloader, criterion, device):
             loss = criterion(outputs, batch_y)
 
             total_loss += loss.item()
-            all_preds.extend(outputs.cpu().numpy())
+            # Apply sigmoid to convert logits to probabilities
+            probs = torch.sigmoid(outputs)
+            all_preds.extend(probs.cpu().numpy())
             all_labels.extend(batch_y.cpu().numpy())
 
     avg_loss = total_loss / len(dataloader)
@@ -550,13 +553,28 @@ def evaluate(model, dataloader, criterion, device):
     # Compute all metrics
     all_preds = np.array(all_preds)
     all_labels = np.array(all_labels)
-    pred_binary = (all_preds > 0.5).astype(int)
+
+    # Find optimal threshold for F1 score (instead of hardcoded 0.5)
+    thresholds = np.arange(0.01, 1.0, 0.01)
+    f1_scores = []
+    for thresh in thresholds:
+        pred_binary_thresh = (all_preds > thresh).astype(int)
+        f1 = f1_score(all_labels, pred_binary_thresh, zero_division=0)
+        f1_scores.append(f1)
+
+    best_f1_idx = np.argmax(f1_scores)
+    best_threshold = thresholds[best_f1_idx]
+    best_f1 = f1_scores[best_f1_idx]
+
+    # Use optimal threshold for other metrics
+    pred_binary = (all_preds > best_threshold).astype(int)
 
     metrics = {
         'loss': avg_loss,
         'auc': roc_auc_score(all_labels, all_preds),
         'accuracy': accuracy_score(all_labels, pred_binary),
-        'f1': f1_score(all_labels, pred_binary, zero_division=0),
+        'f1': best_f1,
+        'f1_threshold': best_threshold,
         'mcc': matthews_corrcoef(all_labels, pred_binary),
         'rmse': np.sqrt(mean_squared_error(all_labels, all_preds)),
         'mae': mean_absolute_error(all_labels, all_preds)
@@ -677,7 +695,7 @@ def run_training(args):
 
     # Loss function with class weights for imbalance
     pos_weight = torch.tensor([(1 - y_train.mean()) / y_train.mean()]).to(DEVICE)
-    criterion = nn.BCELoss()  # Binary cross-entropy
+    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)  # Binary cross-entropy with class weighting
 
     # Optimizer with weight decay (L2 regularization)
     optimizer = optim.AdamW(
